@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inatú — Mapa de Novos Produtos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --verde:        #1D9E75;
+  --verde-escuro: #085041;
+  --verde-claro:  #E1F5EE;
+  --fundo:        #F1EFE8;
+  --texto:        #2C2C2A;
+  --branco:       #FFFFFF;
+  --cinza:        #6B7280;
+  --cinza-claro:  #F4F4F2;
+  --vermelho:     #DC2626;
+  --amarelo:      #D97706;
+
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: #000;
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* === SLIDE SYSTEM === */
+.deck {
+  width: 100vw; height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(60px);
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+.slide.prev {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+/* === NAV === */
+.nav {
+  position: fixed;
+  bottom: clamp(16px, 3vh, 28px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.nav-dot.active {
+  background: var(--verde);
+  transform: scale(1.4);
+}
+
+.nav-arrows {
+  position: fixed;
+  bottom: clamp(16px, 3vh, 28px);
+  right: clamp(20px, 3vw, 40px);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.nav-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* slide counter */
+.counter {
+  position: fixed;
+  bottom: clamp(16px, 3vh, 28px);
+  left: clamp(20px, 3vw, 40px);
+  color: rgba(255,255,255,0.4);
+  font-family: var(--font-body);
+  font-size: clamp(12px, 1.3vw, 15px);
+  z-index: 100;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+}
+
+/* === LOGO === */
+.logo {
+  height: clamp(22px, 3vh, 32px);
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-white { /* SVG already white */ }
+
+/* === ANIMATIONS === */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes widthIn {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+.slide.active .anim-1 { animation: fadeUp 0.6s ease both; animation-delay: 0.1s; }
+.slide.active .anim-2 { animation: fadeUp 0.6s ease both; animation-delay: 0.25s; }
+.slide.active .anim-3 { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
+.slide.active .anim-4 { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
+.slide.active .anim-5 { animation: fadeUp 0.6s ease both; animation-delay: 0.7s; }
+.slide.active .anim-fade { animation: fadeIn 0.8s ease both; animation-delay: 0.1s; }
+.slide.active .anim-scale { animation: scaleIn 0.6s ease both; animation-delay: 0.2s; }
+.slide.active .anim-right { animation: slideRight 0.6s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide, .slide *, .anim-1, .anim-2, .anim-3, .anim-4, .anim-5,
+  .anim-fade, .anim-scale, .anim-right { animation: none !important; transition: none !important; }
+}
+
+/* ====================================================
+   SLIDE 1 — CAPA
+   ==================================================== */
+#s1 {
+  background: var(--verde-escuro);
+  justify-content: flex-end;
+  padding: clamp(32px, 6vh, 64px) clamp(32px, 6vw, 80px);
+}
+
+#s1 .bg-circles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#s1 .bg-circles::before {
+  content: '';
+  position: absolute;
+  width: clamp(300px, 55vw, 700px);
+  height: clamp(300px, 55vw, 700px);
+  border-radius: 50%;
+  border: 1px solid rgba(29,158,117,0.25);
+  top: -15%;
+  right: -10%;
+}
+
+#s1 .bg-circles::after {
+  content: '';
+  position: absolute;
+  width: clamp(200px, 40vw, 520px);
+  height: clamp(200px, 40vw, 520px);
+  border-radius: 50%;
+  background: rgba(29,158,117,0.12);
+  top: -5%;
+  right: 2%;
+}
+
+#s1 .s1-logo-wrap {
+  position: absolute;
+  top: clamp(24px, 5vh, 48px);
+  left: clamp(32px, 6vw, 80px);
+}
+
+#s1 .s1-tag {
+  font-family: var(--font-body);
+  font-size: clamp(12px, 1.3vw, 15px);
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--verde);
+  margin-bottom: clamp(12px, 2vh, 20px);
+}
+
+#s1 .s1-title {
+  font-family: var(--font-head);
+  font-size: clamp(40px, 7vw, 88px);
+  font-weight: 800;
+  color: var(--branco);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: clamp(12px, 2vh, 20px);
+}
+
+#s1 .s1-title span {
+  color: var(--verde);
+}
+
+#s1 .s1-sub {
+  font-size: clamp(14px, 1.6vw, 20px);
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: clamp(24px, 4vh, 48px);
+}
+
+#s1 .s1-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+#s1 .s1-line {
+  width: clamp(32px, 4vw, 56px);
+  height: 1px;
+  background: var(--verde);
+}
+
+#s1 .s1-date {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ====================================================
+   SLIDE 2 — FILTRO ESTRATÉGICO
+   ==================================================== */
+#s2 {
+  background: var(--fundo);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+#s2 .s-header {
+  margin-bottom: clamp(20px, 3.5vh, 36px);
+}
+
+.s-eyebrow {
+  font-size: clamp(14px, 1.5vw, 17px);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--verde);
+  margin-bottom: 6px;
+}
+
+.s-title {
+  font-family: var(--font-head);
+  font-size: clamp(26px, 4vw, 50px);
+  font-weight: 800;
+  color: var(--verde-escuro);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.s-sub {
+  font-size: clamp(14px, 1.5vw, 17px);
+  color: var(--cinza);
+  font-style: italic;
+  margin-top: 6px;
+  font-weight: 300;
+}
+
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(12px, 2vw, 24px);
+  flex: 1;
+}
+
+.card {
+  background: var(--branco);
+  border-radius: 12px;
+  padding: clamp(18px, 2.5vw, 28px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--verde);
+}
+
+.card-num {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  color: var(--verde-claro);
+  line-height: 1;
+  margin-bottom: clamp(8px, 1.2vh, 14px);
+}
+
+.card-title {
+  font-family: var(--font-head);
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 700;
+  color: var(--verde-escuro);
+  margin-bottom: clamp(8px, 1vh, 12px);
+}
+
+.card-body {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: var(--texto);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ====================================================
+   SLIDE 3 — VISÃO GERAL
+   ==================================================== */
+#s3 {
+  background: var(--branco);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+.table-wrap {
+  flex: 1;
+  overflow: hidden;
+  margin-top: clamp(16px, 2.5vh, 28px);
+}
+
+.produtos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.produtos-table th {
+  background: var(--verde-escuro);
+  color: var(--branco);
+  padding: clamp(8px, 1.2vh, 14px) clamp(10px, 1.4vw, 16px);
+  text-align: left;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: clamp(14px, 1.5vw, 17px);
+  letter-spacing: 0.05em;
+}
+
+.produtos-table td {
+  padding: clamp(8px, 1.2vh, 13px) clamp(10px, 1.4vw, 16px);
+  border-bottom: 1px solid #EAEAEA;
+  vertical-align: middle;
+  color: var(--texto);
+  font-weight: 400;
+}
+
+.produtos-table tr:nth-child(even) td {
+  background: var(--verde-claro);
+}
+
+.priority-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: clamp(13px, 1.3vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.p-high { background: #DCFCE7; color: #166534; }
+.p-mid  { background: #FEF3C7; color: #92400E; }
+.p-low  { background: #F3F4F6; color: #6B7280; }
+
+/* ====================================================
+   SLIDES 4–8 — PRODUTO
+   ==================================================== */
+.slide-produto {
+  padding: 0;
+}
+
+.slide-produto .prod-header {
+  padding: clamp(20px, 3.5vh, 36px) clamp(32px, 7vw, 90px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.slide-produto .prod-tag {
+  font-size: clamp(14px, 1.5vw, 17px);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 4px;
+}
+
+.slide-produto .prod-name {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 4.5vw, 56px);
+  font-weight: 800;
+  color: var(--branco);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.slide-produto .prod-sub {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: rgba(255,255,255,0.6);
+  font-style: italic;
+  margin-top: 4px;
+  font-weight: 300;
+}
+
+.slide-produto .prod-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 clamp(32px, 7vw, 90px) clamp(8px, 1.5vh, 16px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2.5vw, 32px);
+  align-content: start;
+}
+
+.slide-produto .prod-tagline {
+  padding: clamp(10px, 1.5vh, 16px) clamp(32px, 7vw, 90px);
+  background: rgba(0,0,0,0.15);
+  font-style: italic;
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: rgba(255,255,255,0.75);
+  flex-shrink: 0;
+  border-left: 3px solid rgba(255,255,255,0.3);
+  margin: 0 clamp(32px, 7vw, 90px) clamp(10px, 1.5vh, 16px);
+  border-radius: 0 6px 6px 0;
+}
+
+.col-pros, .col-cons {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vh, 10px);
+}
+
+.col-label {
+  font-family: var(--font-head);
+  font-size: clamp(13px, 1.4vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: clamp(4px, 0.8vh, 8px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.col-label.pros { color: rgba(255,255,255,0.9); }
+.col-label.cons { color: rgba(255,100,100,0.9); }
+
+.col-label::before {
+  content: '';
+  display: block;
+  width: 20px; height: 2px;
+  background: currentColor;
+}
+
+.item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: clamp(13px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: rgba(255,255,255,0.82);
+  font-weight: 300;
+}
+
+.item-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.dot-pro { background: #4ADE80; }
+.dot-con { background: #F87171; }
+
+.prod-stats {
+  display: grid;
+  flex-shrink: 0;
+  padding: clamp(10px, 1.8vh, 18px) clamp(32px, 7vw, 90px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2);
+}
+
+.prod-stats-inner {
+  display: flex;
+  gap: 0;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-item:last-child { border-right: none; }
+
+.stat-val {
+  font-family: var(--font-head);
+  font-size: clamp(15px, 1.8vw, 21px);
+  font-weight: 700;
+  color: var(--branco);
+  line-height: 1.2;
+}
+
+.stat-lbl {
+  font-size: clamp(13px, 1.3vw, 16px);
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* Colors per product */
+.bg-hidrata   { background: linear-gradient(145deg, #0B5C47 0%, #0D7A5F 100%); }
+.bg-dose      { background: linear-gradient(145deg, #085041 0%, #0E6B55 100%); }
+.bg-reds      { background: linear-gradient(145deg, #7C1D2E 0%, #9B2335 100%); }
+.bg-tube      { background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%); }
+.bg-fase2     { background: linear-gradient(145deg, #2d3436 0%, #3d4045 100%); }
+
+/* ====================================================
+   SLIDE 9 — COMPARATIVO
+   ==================================================== */
+#s9 {
+  background: var(--fundo);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: clamp(16px, 2.5vh, 28px);
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.comp-table th {
+  background: var(--verde-escuro);
+  color: var(--branco);
+  padding: clamp(8px, 1.2vh, 13px) clamp(10px, 1.4vw, 14px);
+  text-align: left;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: clamp(13px, 1.4vw, 16px);
+  letter-spacing: 0.06em;
+}
+
+.comp-table td {
+  padding: clamp(8px, 1.1vh, 12px) clamp(10px, 1.4vw, 14px);
+  border-bottom: 1px solid #EAEAEA;
+  vertical-align: middle;
+}
+
+.comp-table tr:nth-child(even) td { background: var(--verde-claro); }
+
+.dots-cell {
+  display: flex; gap: 3px; align-items: center;
+}
+
+.d-full { width:10px; height:10px; border-radius:50%; background:var(--verde); }
+.d-half { width:10px; height:10px; border-radius:50%; background:var(--amarelo); }
+.d-empty { width:10px; height:10px; border-radius:50%; background:#D1D5DB; }
+
+/* ====================================================
+   SLIDE 10 — BENCHMARKS
+   ==================================================== */
+#s10 {
+  background: var(--branco);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+.bench-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: clamp(16px, 2.5vh, 28px);
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.bench-table th {
+  background: var(--verde-escuro);
+  color: var(--branco);
+  padding: clamp(8px, 1.2vh, 14px) clamp(10px, 1.4vw, 16px);
+  text-align: left;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: clamp(13px, 1.4vw, 16px);
+  letter-spacing: 0.06em;
+}
+
+.bench-table td {
+  padding: clamp(8px, 1.2vh, 13px) clamp(10px, 1.4vw, 16px);
+  border-bottom: 1px solid #EAEAEA;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.bench-table tr:nth-child(even) td { background: var(--verde-claro); }
+
+.bench-brand {
+  font-family: var(--font-head);
+  font-weight: 700;
+  color: var(--verde-escuro);
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.learn { color: #166534; }
+.avoid { color: var(--vermelho); }
+
+/* ====================================================
+   SLIDE 11 — PERGUNTAS
+   ==================================================== */
+#s11 {
+  background: var(--verde-escuro);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+#s11 .s-title { color: var(--branco); }
+#s11 .s-eyebrow { color: var(--verde); }
+
+.questions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(12px, 2vw, 20px);
+  margin-top: clamp(16px, 2.5vh, 28px);
+  flex: 1;
+}
+
+.q-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: clamp(16px, 2.2vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.q-card:hover { background: rgba(255,255,255,0.1); }
+
+.q-num {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 800;
+  color: var(--verde);
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.q-text {
+  font-family: var(--font-head);
+  font-size: clamp(15px, 1.7vw, 21px);
+  font-weight: 700;
+  color: var(--branco);
+  line-height: 1.3;
+}
+
+.q-sub {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* ====================================================
+   SLIDE 12 — PRÓXIMOS PASSOS
+   ==================================================== */
+#s12 {
+  background: var(--fundo);
+  padding: clamp(28px, 5vh, 52px) clamp(32px, 7vw, 90px);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: clamp(12px, 2vw, 20px);
+  flex: 1;
+  margin-top: clamp(16px, 2.5vh, 28px);
+}
+
+.step-card {
+  background: var(--branco);
+  border-radius: 12px;
+  padding: clamp(16px, 2vw, 24px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--verde);
+}
+
+.step-fase {
+  font-size: clamp(13px, 1.4vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--verde);
+}
+
+.step-title {
+  font-family: var(--font-head);
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 700;
+  color: var(--verde-escuro);
+}
+
+.step-body {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: var(--cinza);
+  line-height: 1.55;
+  font-weight: 300;
+}
+
+.closing-tagline {
+  text-align: center;
+  font-style: italic;
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: var(--verde);
+  padding-top: clamp(8px, 1.2vh, 14px);
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+/* ====================================================
+   LOGO HEADER (light slides)
+   ==================================================== */
+.slide-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  margin-bottom: clamp(12px, 2vh, 20px);
+}
+
+@media (max-height: 700px) {
+  .s-title { font-size: clamp(18px, 2.8vw, 30px) !important; }
+  .card { padding: 12px 16px; }
+  .card-num { font-size: 28px; }
+  .item-row { font-size: 11px; }
+}
+
+@media (max-height: 600px) {
+  .s-eyebrow { display: none; }
+  .s-sub { display: none; }
+  .card-body { display: none; }
+}
+
+@media (max-height: 500px) {
+  .cards-3, .questions-grid, .steps-grid { gap: 8px; }
+  .q-num { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- ====================================================
+     SLIDE 1 — CAPA
+     ==================================================== -->
+<div class="slide" id="s1" data-slide="0">
+  <div class="bg-circles"></div>
+  <div class="s1-logo-wrap anim-fade">
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="anim-1">
+    <div class="s1-tag">Reunião de Produto · Maio 2026</div>
+  </div>
+  <div class="anim-2">
+    <h1 class="s1-title">Mapa de<br><span>Novos Produtos</span></h1>
+  </div>
+  <div class="anim-3">
+    <p class="s1-sub">Conceitos, análise e caminhos para discussão</p>
+  </div>
+  <div class="s1-meta anim-4">
+    <div class="s1-line"></div>
+    <span class="s1-date">Inatú Frutas &amp; Naturais</span>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 2 — FILTRO ESTRATÉGICO
+     ==================================================== -->
+<div class="slide" id="s2" data-slide="1">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow">Direção</div>
+      <h2 class="s-title">O filtro estratégico</h2>
+      <p class="s-sub">O que faz sentido expandir — e o que foge do território da marca</p>
+    </div>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMGYwZDBjOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="cards-3">
+    <div class="card anim-2">
+      <div class="card-num">01</div>
+      <div class="card-title">Natural preservado</div>
+      <div class="card-body">Preferir processos que mantêm a fruta intacta: liofilização, congelamento, envase limpo, formulação curta.</div>
+    </div>
+    <div class="card anim-3">
+      <div class="card-num">02</div>
+      <div class="card-title">Praticidade real</div>
+      <div class="card-body">Resolver o atrito do consumo: tubinho, stick, pouch, dose única, preparo em 30 segundos. Sem utensílios.</div>
+    </div>
+    <div class="card anim-4">
+      <div class="card-num">03</div>
+      <div class="card-title">Sem excesso</div>
+      <div class="card-body">Evitar chocolate, doce funcional, detox agressivo e performance artificial. A marca precisa ser sóbria.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 3 — VISÃO GERAL
+     ==================================================== -->
+<div class="slide" id="s3" data-slide="2">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow">Portfólio</div>
+      <h2 class="s-title">Visão geral das ideias</h2>
+      <p class="s-sub">Seis produtos em análise — do mais viável ao mais aspiracional</p>
+    </div>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMGYwZDBjOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="table-wrap anim-2">
+    <table class="produtos-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Formato</th>
+          <th>Cadeia fria</th>
+          <th>Complexidade</th>
+          <th>Prioridade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Inatú Hidrata</strong></td>
+          <td>Stick 4–7g</td>
+          <td>Não</td>
+          <td>Média</td>
+          <td><span class="priority-tag p-high">Muito alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Dose Natural</strong></td>
+          <td>Stick/pouch pó</td>
+          <td>Não</td>
+          <td>Média</td>
+          <td><span class="priority-tag p-high">Muito alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Reds</strong></td>
+          <td>Stick/pouch/lata</td>
+          <td>Não</td>
+          <td>Média</td>
+          <td><span class="priority-tag p-mid">Alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Tube</strong></td>
+          <td>Pouch 80–100g</td>
+          <td>Sim (−18°C)</td>
+          <td>Alta</td>
+          <td><span class="priority-tag p-mid">Alta — piloto</span></td>
+        </tr>
+        <tr>
+          <td><strong>Superfruta Proteica</strong></td>
+          <td>Pouch 450g</td>
+          <td>Não</td>
+          <td>Alta</td>
+          <td><span class="priority-tag p-low">Fase 2</span></td>
+        </tr>
+        <tr>
+          <td><strong>Ritual (café/mate)</strong></td>
+          <td>Pote 200g</td>
+          <td>Não</td>
+          <td>Média/alta</td>
+          <td><span class="priority-tag p-low">Fase 2</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 4 — INATÚ HIDRATA
+     ==================================================== -->
+<div class="slide slide-produto bg-hidrata" id="s4" data-slide="3">
+  <div class="prod-header anim-1">
+    <div>
+      <div class="prod-tag">Produto 01</div>
+      <div class="prod-name">Inatú Hidrata</div>
+      <div class="prod-sub">Stick de eletrólitos com fruta real · sem cadeia fria</div>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="prod-tagline anim-2">"O produto mais fácil de lançar — recorrente, leve, presente no dia a dia de quem se move."</div>
+  <div class="prod-body anim-3">
+    <div class="col-pros">
+      <div class="col-label pros">Pontos fortes</div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Sem cadeia fria — logística seca e simples</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Alta recorrência: academia, corrida, calor, escritório</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Canais óbvios: delivery, empório, assinatura mensal</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Boa margem estimada por unidade</span></div>
+    </div>
+    <div class="col-cons">
+      <div class="col-label cons">Pontos fracos</div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Mercado competitivo (Liquid I.V., Waterdrop, Rucá)</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Risco de virar suplemento genérico sem posicionamento certo</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Sabor no MVP é difícil de acertar de primeira</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Regulatório pode exigir enquadramento específico</span></div>
+    </div>
+  </div>
+  <div class="prod-stats anim-4">
+    <div class="prod-stats-inner">
+      <div class="stat-item"><div class="stat-val">R$ 0,90–2,50</div><div class="stat-lbl">Custo/stick</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 59–99</div><div class="stat-lbl">Preço caixa 15</div></div>
+      <div class="stat-item"><div class="stat-val">Sem freezer</div><div class="stat-lbl">Logística</div></div>
+      <div class="stat-item"><div class="stat-val">30–60 dias</div><div class="stat-lbl">MVP estimado</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 5 — INATÚ DOSE NATURAL
+     ==================================================== -->
+<div class="slide slide-produto bg-dose" id="s5" data-slide="4">
+  <div class="prod-header anim-1">
+    <div>
+      <div class="prod-tag">Produto 02</div>
+      <div class="prod-name">Inatú Dose Natural</div>
+      <div class="prod-sub">Fruta liofilizada em pó · stick 3–5g ou pouch 50–100g</div>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="prod-tagline anim-2">"O mais fiel ao manifesto: água removida, fruta preservada. Produto educativo com diferencial claro."</div>
+  <div class="prod-body anim-3">
+    <div class="col-pros">
+      <div class="col-label pros">Pontos fortes</div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Máxima aderência ao DNA — fruta real, mínimo processamento</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Versátil: água, iogurte, vitamina, bowl, aveia</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Diferencial educativo forte — ingrediente visível e verificável</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Sem cadeia fria, logística simples</span></div>
+    </div>
+    <div class="col-cons">
+      <div class="col-label cons">Pontos fracos</div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Custo de insumo alto — mirtilo e framboesa liofilizados são caros</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Público mais nichado do que Hidrata ou Reds</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Dissolução e textura precisam de ajuste fino</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Rotulagem cuidadosa (sem açúcar adicionado ≠ sem açúcar)</span></div>
+    </div>
+  </div>
+  <div class="prod-stats anim-4">
+    <div class="prod-stats-inner">
+      <div class="stat-item"><div class="stat-val">R$ 1,20–4,00</div><div class="stat-lbl">Custo/stick</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 69–149</div><div class="stat-lbl">Preço caixa 15</div></div>
+      <div class="stat-item"><div class="stat-val">Mirtilo · Morango · Framboesa</div><div class="stat-lbl">Sabores iniciais</div></div>
+      <div class="stat-item"><div class="stat-val">30–60 dias</div><div class="stat-lbl">MVP estimado</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 6 — INATÚ REDS
+     ==================================================== -->
+<div class="slide slide-produto bg-reds" id="s6" data-slide="5">
+  <div class="prod-header anim-1">
+    <div>
+      <div class="prod-tag">Produto 03</div>
+      <div class="prod-name">Inatú Reds</div>
+      <div class="prod-sub">Bebida vermelha em pó · frutas e antioxidantes naturais</div>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="prod-tagline anim-2">"O produto de marca — visual forte, assinável, audiência ampla. A fruta precisa ser protagonista."</div>
+  <div class="prod-body anim-3">
+    <div class="col-pros">
+      <div class="col-label pros">Pontos fortes</div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Visual e cor impactantes — fruta vermelha tem forte apelo</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Bom produto de assinatura mensal</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Fórmula versátil: morango, acerola, beterraba, hibisco, mirtilo</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Amplia alcance sem sair do território natural</span></div>
+    </div>
+    <div class="col-cons">
+      <div class="col-label cons">Pontos fracos</div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Fórmula pode derivar para suplemento genérico</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Mercado saturado de "sucos verdes/vermelhos"</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Claim precisa ser seguro — evitar detox, desincha, imunidade</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Custo varia muito conforme a fórmula final</span></div>
+    </div>
+  </div>
+  <div class="prod-stats anim-4">
+    <div class="prod-stats-inner">
+      <div class="stat-item"><div class="stat-val">R$ 35–95</div><div class="stat-lbl">Custo pouch/lata</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 119–249</div><div class="stat-lbl">Preço venda</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 4,90–8,90</div><div class="stat-lbl">Preço/stick</div></div>
+      <div class="stat-item"><div class="stat-val">Alta</div><div class="stat-lbl">Potencial de marca</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 7 — INATÚ TUBE
+     ==================================================== -->
+<div class="slide slide-produto bg-tube" id="s7" data-slide="6">
+  <div class="prod-header anim-1">
+    <div>
+      <div class="prod-tag">Produto Herói</div>
+      <div class="prod-name">Inatú Tube</div>
+      <div class="prod-sub">Tubinho/pouch congelado cremoso · 80–100g · o produto símbolo</div>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="prod-tagline anim-2">"Formato mais memorável e diferenciado — exige cadeia fria, testes de textura e maior investimento."</div>
+  <div class="prod-body anim-3">
+    <div class="col-pros">
+      <div class="col-label pros">Pontos fortes</div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Formato on-the-go marcante e proprietário</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Alta diferenciação visual no ponto de venda</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Fórmula limpa: sem açúcar adicionado, fruta protagonista</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Potencial de se tornar o produto símbolo da marca</span></div>
+    </div>
+    <div class="col-cons">
+      <div class="col-label cons">Pontos fracos</div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Cadeia fria obrigatória — logística −18°C eleva custo e complexidade</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Textura sem açúcar é desafio técnico real (congelado endurece)</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Maior CAPEX: lote piloto de 2k–10k unidades</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Co-packer precisa dominar sorbet com fórmula limpa</span></div>
+    </div>
+  </div>
+  <div class="prod-stats anim-4">
+    <div class="prod-stats-inner">
+      <div class="stat-item"><div class="stat-val">R$ 3,50–7,00</div><div class="stat-lbl">Custo MVP/un.</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 8,90–12,90</div><div class="stat-lbl">Preço sugerido</div></div>
+      <div class="stat-item"><div class="stat-val">2k–10k un.</div><div class="stat-lbl">Lote piloto</div></div>
+      <div class="stat-item"><div class="stat-val">Sim (−18°C)</div><div class="stat-lbl">Cadeia fria</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 8 — FASE 2
+     ==================================================== -->
+<div class="slide slide-produto bg-fase2" id="s8" data-slide="7">
+  <div class="prod-header anim-1">
+    <div>
+      <div class="prod-tag">Fase 2</div>
+      <div class="prod-name">Superfruta &amp; Ritual</div>
+      <div class="prod-sub">Proteína vegetal com fruta real · Bebida matinal com café/mate/guaraná</div>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="prod-tagline anim-2">"Boas margens e alta recorrência — devem entrar depois que a marca tiver domínio nos pós."</div>
+  <div class="prod-body anim-3">
+    <div class="col-pros">
+      <div class="col-label pros">Pontos fortes</div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Ticket alto (R$ 129–249) e recorrência natural</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Ritual: conexão com hábito matinal já estabelecido</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Superfruta: amplia público para proteína plant-based</span></div>
+      <div class="item-row"><span class="item-dot dot-pro"></span><span>Diferencial: fruta real em categoria de suplemento</span></div>
+    </div>
+    <div class="col-cons">
+      <div class="col-label cons">Pontos fracos</div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Regulatório mais complexo — pode enquadrar como suplemento</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Risco de distanciar a marca do território de fruta</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Competição com SuperCoffee, Rucá e players consolidados</span></div>
+      <div class="item-row"><span class="item-dot dot-con"></span><span>Depende de validação prévia dos outros SKUs</span></div>
+    </div>
+  </div>
+  <div class="prod-stats anim-4">
+    <div class="prod-stats-inner">
+      <div class="stat-item"><div class="stat-val">R$ 149–249</div><div class="stat-lbl">Preço Superfruta</div></div>
+      <div class="stat-item"><div class="stat-val">R$ 129–229</div><div class="stat-lbl">Preço Ritual</div></div>
+      <div class="stat-item"><div class="stat-val">Fase 2</div><div class="stat-lbl">Prioridade</div></div>
+      <div class="stat-item"><div class="stat-val">Alta</div><div class="stat-lbl">Margem potencial</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 9 — COMPARATIVO
+     ==================================================== -->
+<div class="slide" id="s9" data-slide="8">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow">Análise</div>
+      <h2 class="s-title">Comparativo analítico</h2>
+      <p class="s-sub">Velocidade × aderência ao manifesto × complexidade × risco</p>
+    </div>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMGYwZDBjOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="table-wrap anim-2">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Manifesto</th>
+          <th>Velocidade</th>
+          <th>Complexidade</th>
+          <th>Risco</th>
+          <th>Prioridade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Inatú Hidrata</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-full"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-half"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-high">Muito alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Dose Natural</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-full"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-full"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-half"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-high">Muito alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Reds</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-half"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-mid">Alta</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inatú Tube</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-full"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-mid">Alta — piloto</span></td>
+        </tr>
+        <tr>
+          <td><strong>Superfruta Proteica</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-low">Fase 2</span></td>
+        </tr>
+        <tr>
+          <td><strong>Ritual</strong></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-empty"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-full"></span><span class="d-full"></span><span class="d-empty"></span></div></td>
+          <td><div class="dots-cell"><span class="d-half"></span><span class="d-half"></span><span class="d-empty"></span></div></td>
+          <td><span class="priority-tag p-low">Fase 2</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px; font-size:clamp(11px, 1.2vw, 14px); color:var(--cinza); display:flex; gap:20px;">
+      <span style="display:flex;align-items:center;gap:5px;"><span class="d-full" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--verde);"></span> Alta</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span class="d-half" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--amarelo);"></span> Média</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span class="d-empty" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#D1D5DB;"></span> Baixa</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 10 — BENCHMARKS
+     ==================================================== -->
+<div class="slide" id="s10" data-slide="9">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow">Referências</div>
+      <h2 class="s-title">Benchmarks</h2>
+      <p class="s-sub">O que aprender das referências — e onde a Inatú não deve ir</p>
+    </div>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMGYwZDBjOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="table-wrap anim-2">
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th style="width:14%">Marca</th>
+          <th style="width:43%">✓ O que aproveitar</th>
+          <th style="width:43%">✗ O que evitar na Inatú</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="bench-brand">Frooty Tube</span></td>
+          <td class="learn">Formato tubo on-the-go, freezer, praticidade no consumo</td>
+          <td class="avoid">Açúcar, glucose, maltodextrina, corantes artificiais</td>
+        </tr>
+        <tr>
+          <td><span class="bench-brand">Jui</span></td>
+          <td class="learn">Rotina diária em pó, dose simples em água</td>
+          <td class="avoid">Linguagem detox/desincha e promessas amplas</td>
+        </tr>
+        <tr>
+          <td><span class="bench-brand">Rucá</span></td>
+          <td class="learn">Superalimento brasileiro, plant-based, sem aditivos</td>
+          <td class="avoid">Virar proteína genérica — fruta precisa ser protagonista</td>
+        </tr>
+        <tr>
+          <td><span class="bench-brand">Kencko</span></td>
+          <td class="learn">Fruta liofilizada em sachê, água removida como conceito</td>
+          <td class="avoid">Fórmulas complexas e ingredientes importados</td>
+        </tr>
+        <tr>
+          <td><span class="bench-brand">Waterdrop</span></td>
+          <td class="learn">Hidratação em stick, zero açúcar, praticidade extrema</td>
+          <td class="avoid">Excesso de saborizante, distanciamento da fruta real</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 11 — PERGUNTAS
+     ==================================================== -->
+<div class="slide" id="s11" data-slide="10">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow" style="color:var(--verde)">Discussão</div>
+      <h2 class="s-title" style="color:var(--branco)">Perguntas para a reunião</h2>
+    </div>
+    <img class="logo logo-white" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjRkZGRkZGOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="questions-grid">
+    <div class="q-card anim-2">
+      <div class="q-num">01</div>
+      <div class="q-text">Qual produto testamos primeiro — e por quê agora?</div>
+      <div class="q-sub">Hidrata e Dose Natural são os caminhos mais diretos. O que nos falta para decidir?</div>
+    </div>
+    <div class="q-card anim-3">
+      <div class="q-num">02</div>
+      <div class="q-text">Onde a Inatú definitivamente não deve entrar?</div>
+      <div class="q-sub">Existe uma fronteira clara de produto que preserva o manifesto da marca?</div>
+    </div>
+    <div class="q-card anim-4">
+      <div class="q-num">03</div>
+      <div class="q-text">O Tube é paralelo ou só após validar os pós?</div>
+      <div class="q-sub">Cadeia fria, custo e complexidade técnica podem atrasar — vale o risco agora?</div>
+    </div>
+    <div class="q-card anim-5">
+      <div class="q-num">04</div>
+      <div class="q-text">O que ainda precisamos saber antes de cotar?</div>
+      <div class="q-sub">Há lacunas de informação que bloqueiam a decisão de avançar?</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     SLIDE 12 — PRÓXIMOS PASSOS
+     ==================================================== -->
+<div class="slide" id="s12" data-slide="11">
+  <div class="slide-top anim-1">
+    <div class="s-header">
+      <div class="s-eyebrow">Execução</div>
+      <h2 class="s-title">Próximos passos</h2>
+      <p class="s-sub">Dependem das decisões da reunião — não são um plano fechado</p>
+    </div>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzEiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIwNTUgNzQ0LjAyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMGYwZDBjOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMTUxLjAzLDU4My42MmMtOC4wOC0zNi4xNS45NS0xMDEuNyw3LjA5LTEzOS4wNiw5Ljc2LTU5LjU3LDIyLjMxLTExNi43OCwzNS40LTE3NS42LDIuNjEtMTEuNzcsMi4zNi0yMi4xOC01LjYzLTMxLjc5LTE5LjYxLTIzLjY4LTUyLjI4LTguMDItNzUuMzEsMS4zOS0yMC4yOSw4LjI4LTM2Ljk5LDIuMy02NC4yLS4wMmwtMzAuODctMi42NWMtMzMuMzQtMi44Ni02My4zMiw4LjQtOTAuMjMsMjQuNjQtMzMuMzUsMjAuMTUtNzMuMTEsNDUuMDUtOTYuNSw3NC4xOC00Ny42NSw1OS4zNi04MC4wMywxNTguNjQtODAuNTIsMjMzLjUxLS4yLDI2Ljc4LTE4LjgzLTEuNjMtNTYuOTIsMTkuMTYtNS4yLDIuODYtMTAuNzgsNC4xMy0xNy43NCw0LjA2LTEuMzMtMTcuNDctMS4yNi0zMi4wMS43Ny00OC43MmwyMi45Ni0xODYuNzRjMi4wMi0xNi40LDMuODctMzQuNzQtMS44OC01MC4yMS0xMC4wOS0yNy4yLTMxLjA2LTUwLjA3LTU3LjE2LTYzLjk1LTMwLjUyLTE2LjItMTAyLjk4LTkuODgtMTI2LjMxLDI3LjMzLTEyLjMxLDE5LjYxLTIzLjMsMzcuNjUtMzQuNiw1OC41MmwtNDMuMTYsNzkuODJjLS45NywxLjc1LTQuOTYsNS4wMy01LjkzLDUuNzktMSwuNzMtMi4wMy0uMzEtNi40NS0yLjZsMTYuNTYtMTA4LjUzYzIuNzMtMTcuOTIsMi4zMS0zNS4zNi0xMS41Ny01MC42OC02LjU3LTcuMjYtMjAuNjQtMTEuMjgtMzAuOTUtOS40My0zMC4yOCw1LjQ1LTU4LjczLDguOTYtODkuMjgsMTEuODMtMTguNzYsMS43Ny0zOC45NSwzLjE3LTU0LjE0LDEyLjc3LTExLjI4LDcuMTYtMTIuOTEsMjEuMDgtOC44MiwzMi4yNCwxMC4xOSwyNy44OCw0MS42NywyMy4xMSw1NC44NCwzNy41OSwxMS40MiwxMi41OCw3LjE1LDI4LjI4LDcuNTMsNDIuMDYsMS4zMSw0Ny42Mi0zLjk5LDkyLjIyLTEzLjYsMTM4LjUyLTkuMTUsNDMuOTUtMjIuMjMsMTIwLjM0LTE0Ljc3LDE2My4wNSw1LjgyLDMzLjE1LDYxLjU3LDI3LjcyLDg4LjI3LDI2LjMzLDE2LjExLS44NCwyOS42My0xMC43NiwzMS42NS0yNi4xN2w2LjY5LTUwLjc1YzEuOC0xMy42OCwzLjAxLTI5LjA2LDguNTItNDEuNjgsMzEuNy03Mi43Nyw4NS40My0xNzQuNDIsMTI4Ljk2LTIzOS43Niw1Ljc4LTguNzIsMTcuMTUtMTMuNTMsMjUuOTMtOC4wMywxNC42NCw5LjIsMTEuNTYsMjQuMTEsMTEuMDgsMzcuNGwtMS4yLDM0LjI2Yy0yLjk5LDg0LjM0LTIxLjg1LDE2NS4zNy0zNi43NSwyNDguMDEtMy4xLDE3LjI0LDEzLjc1LDMxLjAxLDI3Ljg2LDM3LjQ5LDI5LjQ3LDEzLjU0LDc4LjE2LDI5LjE4LDEwMS43LDQuNjgsMTAuNzktMTEuMTksMjEuNDEtMjEuODMsMzIuNjQtMzIuNWwzNy4zNS0zNS40MWMyMS4yNy0yMC4xNSwxNi45MiwxMi4yNiw2My44NCw2MC44OCwyMC40MiwyMS4xNyw0My43LDIzLjM0LDY5LjYxLDE5LjM5LDMxLjQ1LTQuODUsNTIuMTYtMTYuMjUsNjkuOTUtMzkuOTgsMjEuOTItMjkuMjMsNDMuNTgtNTguMjgsNjEuNDMtOTAuMzIsNi40Ni0xMS41NSwxMi40MS0yMC4yMSwyMi43My0zMi4yNywyLjczLDkuODgsMy4xOSwxNy42NywxLjU2LDI2LjIzbC0xMy40Myw3MC4yN2MtMy4xOCwxNi44LS4zNywzNC4yOCwxNi41Myw0NS4xOCwyNy45NSwxOC4wMSw4Ni45Nyw0Mi4yNiwxMTQuNzIsMTcuMjUsMjguMi0yNS40Myw1My4xOS01Mi42Nyw3NS40OC04Mi42NCw5LjYzLTEyLjk2LDQuNTgtMzAuMzctNS4zMS00MC0yNi45MS0yNi4xNS01MS42Nyw0Ljg0LTY4LjQ0LTQuMzhaTTEwNTcuMTMsMzMxLjQxYy0xMS44MywzNS4zNS0yMy45NSw2Ny44OS0zOS40OCwxMDEuMDVsLTEzLjExLDI3Ljk4Yy0yNC4wMyw1MS4zMS01Mi4yNCw5OC45MS04Ny4xNSwxNDUuMjQtNi4yNyw4LjMtMTYuOTQsMTUuNTctMjUuNTQsOS40Ny0xMi4xNy05LjAyLTExLjM0LTU1Ljg2LTEwLjk4LTcwLjE5LDEuODItNzYuMDUsMTkuNDktMTY1LjIxLDY5LjUtMjIzLjg5LDE0LjA0LTE2LjQ4LDM0LjMtMjAuNzgsNTYuNDQtMTYuNjUsOS43NywxLjgxLDU2Ljc1LDcuNzMsNTAuMzMsMjYuOTlaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzNS4wMiw1OTUuMjhjLTQuNTEtOC42Ny0xOC4wNC0xOC4yNy0yOS45My0xMy40Ni0yMS44OCw4Ljg4LTM0LjM4LDI4LjQ1LTQzLjgyLDIxLjY5LTEuOS0xLjMzLTQuMzctNy4zNC00LjA4LTkuNzJsMTIuOTUtMTA5LjdjNi44Ni01Ny44NiwxMi43NS0xMTMuMSwyMi4yMy0xNzAuMzcsMi40My0xNC42OCwzLjM2LTMxLjM5LS40OC00NC45LTguMzYtMjkuNDUtNDguNjYtMjcuNjctNzIuMDEtMjUuNjEtMTcuNzUsMS41OC00Ni42NC0yLjAyLTUwLjczLDMxLjc4bC01Ljg5LDQ4LjkxYy0yLjcxLDIyLjMxLTcuNzIsNDEuMjMtMTcuMTcsNjEuNTctMzUuOTUsNzcuMy03NS4zMSwxNTEuMS0xMjYuMzgsMjE5LjkxLTIuNDcsMy4zNS0xMC45OCw1LjMxLTE0LjQ4LDQuMDgtMTcuMDgtNS44Ny0xMi44MS0zOS45My0xMi4yNS01Ni43NywyLjE1LTY1Ljc1LDkuNDQtMTI5LjA1LDIxLjk0LTE5My4wMWwxNi41LTg0LjQ1YzIuMDctMTAuNjItNi40Mi0yMy4wNS0xMy42MS0yOS4xOC04LjM1LTcuMS0yMS4zNi04LjU2LTMyLjM3LTYuNDItMzIuNjMsNi4yOS02My42NywxMS41OS05Ny4wMywxNC4xNy0xOC4xMiwxLjQtMzUuMjcsNi40My01MS44OCwxMS43NS0xMC40Mi03LjQ4LTIxLjE4LTIzLjEzLTMzLjk0LTI0LjcyLTQzLjktNS41My04MC4yOCwxMS4wNS03NS4zMi0xNy4xM2wxMC41NS02MC4wOWMxLjcyLTkuNzEtNi43Ny0yMS4xOS0xMy45My0yNS44OS04LjYyLTUuNjMtMjAuODEtNi0zMC44Ny0xLjc0bC02MS43OCwyNi4xYy0zNS42OCwxNS4wOS0yMi4zLDQ2LjM5LTI4LjgxLDc4LjAyLTIzLjUxLDE1LjYxLTYzLjY1LTMuMjEtNzEuMjUsMjcuMzItMi43LDEwLjgzLTIuNjIsMjQuNjQsNi4xMywzMS45MiwxOC44NywxNS43Myw0Mi4wMiwzLjIxLDU1LjIyLDEyLjMxLDMuMjMsMi4yNCw3LjA3LDEwLjM5LDYuNzYsMTQuMzRsLTUuMDcsNjQuOTdjLTMuODcsNDkuMTItMTMuNDMsOTUuMjctMjQuOTMsMTQyLjc4bC0xNC4zOCw1OS4zN2MtNi40MiwyNi40NS0xMi4wNiw1MS44My00LjY1LDgwLjE5LDIuMDYsNy44NCwxMi41OCwxNy45NCwyMC4wOCwyMy4xNSwyMi4wNSwxNS4zLDQ3LjkyLDE3LjQ3LDczLjczLDIwLjQ4LDIxLjcsMi40OSwzOS45NS02LjY3LDU1LjI1LTE5Ljc2bDcyLjAzLTYxLjYxYzE5LTE2LjIzLDQ0Ljk4LTM2LjUsMjUuMzgtNTcuNzItMjcuNTItMjkuNzgtNjYuOTQsMjAuMy0xMDAuOTQsMjIuMzQtNS4wOC4zMi0xMC4xMS0xMy4yMS05Ljg0LTE4LjY1bDMuOTQtODMuM2MyLjcxLTU3LjQ5LDExLjYtMTEyLjgxLDE5LjM4LTE2OS4yNCwxLjU4LTExLjUxLDkuMjItMTguNjYsMjEuMDItMTguNzdsNzkuMTItLjc5LDI0LjUtMTEuMDljMjUuMTYsMjUuOTEsNTMuMDgsMTguODIsNjEuOTYsMjkuOTQsMjAuMDYsMjUuMDktMjMuNTMsMjUzLjExLTI1LjQsMzAzLjI1LS45LDI0LjMyLDIxLjgxLDQ3LjI2LDM5LjkzLDYyLjgzLDI0LjM1LDIwLjksNTUuMSwyMy44OSw4NS4yOCwxOC4xLDE3LjM2LTMuMzYsMzkuMTItNC45NSw1MS4xMS0xOC4zOSw0MC4zOC00NS4zLDYxLjA3LTEwMy43Niw5NC40Mi0xNTcuNDQsMy4yMSw2LjkyLDUuMjgsMTMuNTEsNC40NywxOC4yN2wtMTQuNzMsODguNThjLTguMDIsNDguMzQsNDIuMzEsNjQuNjksODQuMTYsNzEuOTUsMTguNzcsMy4yNiwzNy4yNi0uMTYsNDkuNzItMTQuNTRsMzkuNjgtNDUuODcsMjUuMTktMjljNy45My05LjE0LDEwLjcyLTIwLjI0LDUuMjgtMzAuNzRaIi8+CiAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjM0LjM0LDU4NC41M2MtMzIuMTMtMTQuNTgtNDkuNDcsMjEuNzgtNjAuMzUsMTIuMTMtMi4xNi0xLjg4LTMuMjEtOC4xNS0yLjg1LTExLjM0bDkuNzYtODkuOTVjNC44My00NC42MiwxMi4wMS04Ny4wOCwyMy4xNC0xMzAuMjMsNi4xNy0yMy44OSwxMS4xMy00Ni4yNiwxNS4wNC03MC45MywxLjU3LTkuODYtMy41OS0yMS4xNS04LjA1LTMwLjM3LTcuODctMTYuMjgtMjUuMzYtMjguMzctNDUuMS0yMy42LTQwLjM0LDkuNzMtODAuMTUsMTcuNzctMTIxLjYyLDIzLjc5LTE0LjA4LDIuMDQtMjUuNzQsOS44Ni0yNi4zOSwyMi42LS41MSwxMC40NCw2LjI3LDI0LjMxLDE4LjcyLDI3Ljk5bDMyLjMyLDkuNjFjMTQuNyw0LjM2LDE2Ljg5LDIxLjEyLDE0LjA1LDMzLjI5LS45LDY0LjE1LTguMzcsMTI1LjM4LTE5LjUsMTg3LjgzbC0xNS45Niw4OS41MmMtMi4zNywxMy40Mi04LjA1LDI4Ljc2LTEuMTIsNDEuODIsMTUuNDQsMjguOTQsODEuMzcsNDQuNiwxMDguNzgsMzYuNzUsMTYuNC00LjcyLDI1LjU3LTIwLjE0LDM2LjQtMzEuMTRsNDYuNjItNDcuMzNjNy44OS03Ljk5LDEyLjgxLTE1LjA0LDEyLjAxLTI1LjczLS43Mi05LjQ2LTUuMzktMTkuOTItMTUuOS0yNC43WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE4MDguNTgsMTY0LjE5YzM0LjI0LTIyLjMsNjcuMTgtNDQuMTUsOTYuODEtNzAuOTksOC4zOS03LjU4LDEzLjg5LTIxLjY4LDExLjQ2LTMxLjU0LTQuMzgtMTcuNzItMTguMDgtMjcuOTQtMzEuODItMzcuNzctMTcuOS0xMi44My0zOS43NC0xNC4xNC01NC45NSwyLjMxbC0yOC4zOSwzMC43My02My4wMSw3MS45OS0yNi42NCwzMC4xM2MtOC40Myw5LjU0LTcuOTUsMjQtLjU4LDMzLjExLDI0LjA2LDI5LjY2LDY4LjEtOS4wNiw5Ny4xMi0yNy45OFoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTcuMjksMTY2Ljk5YzEwLjU2LTE4LjMzLDE2Ljk4LTM5LjU4LDIwLjYzLTYwLjQ4LDIuOTMtMTYuOTMtNC4yMy0zMi43Ni0yMS4wNi00MC4zNi0yMi4zMy0xMC4xLTczLjA1LTE2LjE0LTg2Ljg2LDEuMDItMjQuODIsMzAuOTEtMzguMDMsOTIuMjYtMTQuMjcsMTE2LjU2LDE1LjI4LDE1LjYxLDg0LjA3LDEzLjYsMTAxLjU2LTE2Ljc0WiIvPgo8L3N2Zz4=" alt="Inatú">
+  </div>
+  <div class="steps-grid">
+    <div class="step-card anim-2">
+      <div class="step-fase">Fase 1 · Dias 1–15</div>
+      <div class="step-title">Cotação e briefing</div>
+      <div class="step-body">Definir 2–3 SKUs prioritários. Enviar briefing para co-packers e fornecedores de embalagem.</div>
+    </div>
+    <div class="step-card anim-3">
+      <div class="step-fase">Fase 2 · Dias 16–45</div>
+      <div class="step-title">Protótipos</div>
+      <div class="step-body">3 sabores de Hidrata, 2–3 de Dose/Reds, 2 versões de Tube. Testar sabor, textura e embalagem.</div>
+    </div>
+    <div class="step-card anim-4">
+      <div class="step-fase">Fase 3 · Dias 46–60</div>
+      <div class="step-title">Teste de mercado</div>
+      <div class="step-body">Vender lote pequeno para clientes atuais, academia e empórios. Medir recompra, NPS e objeções.</div>
+    </div>
+    <div class="step-card anim-5">
+      <div class="step-fase">Fase 4 · Dias 61–90</div>
+      <div class="step-title">Lote piloto</div>
+      <div class="step-body">500–2.000 unidades de pós/sticks. Tube em desenvolvimento até acertar margem e cadeia fria.</div>
+    </div>
+  </div>
+  <div class="closing-tagline anim-5">"Fruta fresca como origem · pó/stick como rotina · Tube como desejo."</div>
+</div>
+
+</div><!-- end deck -->
+
+<!-- Nav dots -->
+<div class="nav" id="navDots"></div>
+
+<!-- Nav arrows -->
+<div class="nav-arrows">
+  <button class="nav-btn" id="btnPrev">&#8592;</button>
+  <button class="nav-btn" id="btnNext">&#8594;</button>
+</div>
+
+<!-- Counter -->
+<div class="counter" id="counter">1 / 12</div>
+
+<script>
+/* === NAVIGATION === */
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('navDots');
+const counter = document.getElementById('counter');
+let current = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+  dot.addEventListener('click', () => goTo(i));
+  navDots.appendChild(dot);
+});
+
+function goTo(n) {
+  if (n < 0 || n >= slides.length) return;
+  const prev = slides[current];
+  prev.classList.remove('active');
+  prev.classList.add('prev');
+  setTimeout(() => prev.classList.remove('prev'), 500);
+
+  current = n;
+  slides[current].classList.add('active');
+
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === current);
+  });
+  counter.textContent = (current + 1) + ' / ' + slides.length;
+}
+
+// Init first slide
+slides[0].classList.add('active');
+
+document.getElementById('btnNext').addEventListener('click', () => goTo(current + 1));
+document.getElementById('btnPrev').addEventListener('click', () => goTo(current - 1));
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault(); goTo(current + 1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault(); goTo(current - 1);
+  }
+});
+
+// Touch swipe
+let touchX = 0;
+document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive: true});
+document.addEventListener('touchend', e => {
+  const dx = touchX - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 50) goTo(current + (dx > 0 ? 1 : -1));
+}, {passive: true});
+</script>
+</body>
+</html>
